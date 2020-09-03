@@ -3,14 +3,16 @@ from tkinter import *
 root = Tk()
 buttonWidth = 3
 fields = []
-rows = [[]]
+rows = [[0 for x in range(8)] for y in range(8)]
 
 def close_window():
 	root.destroy()
 
 def compute():
-	for entry in fields:
-		print(entry.get())
+	for i in range(8):
+		for k in range (8):
+			rows[i][k] = fields[(i * 10) + k].get()
+			print(rows[i][k])
 
 def setupFields():
 	index = 0
