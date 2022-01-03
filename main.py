@@ -3,17 +3,6 @@ import numpy as np
 
 def solve_sudoku():
     board = np.array([
-        np.array([1, 4, 5, 2, 3, 6, 7, 8, 9]),
-        np.array([2, 0, 0, 0, 0, 0, 0, 0, 0]),
-        np.array([3, 0, 0, 0, 0, 0, 0, 0, 0]),
-        np.array([4, 0, 0, 0, 0, 0, 0, 0, 0]),
-        np.array([5, 0, 0, 0, 0, 0, 0, 0, 0]),
-        np.array([6, 0, 0, 0, 0, 0, 0, 0, 0]),
-        np.array([7, 0, 0, 0, 0, 0, 0, 0, 0]),
-        np.array([8, 0, 0, 0, 0, 0, 0, 0, 0]),
-        np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
-    ])
-    board = np.array([
         np.array([3, 0, 6, 5, 0, 8, 4, 0, 0]),
         np.array([5, 2, 0, 0, 0, 0, 0, 0, 0]),
         np.array([0, 8, 7, 0, 0, 0, 0, 3, 1]),
@@ -24,34 +13,40 @@ def solve_sudoku():
         np.array([0, 0, 0, 0, 0, 0, 0, 7, 4]),
         np.array([0, 0, 5, 2, 0, 6, 3, 0, 0])
     ])
-    # print(array)
-    # print(array.size)
+
+    board = np.array([
+        np.array([0, 0, 0, 0, 0, 0, 0, 0, 0]),
+        np.array([0, 0, 0, 0, 0, 3, 0, 8, 5]),
+        np.array([0, 0, 1, 0, 2, 0, 0, 0, 0]),
+        np.array([0, 0, 0, 5, 0, 7, 0, 0, 0]),
+        np.array([0, 0, 4, 0, 0, 0, 1, 0, 0]),
+        np.array([0, 9, 0, 0, 0, 0, 0, 0, 0]),
+        np.array([5, 0, 0, 0, 0, 0, 0, 7, 3]),
+        np.array([0, 0, 2, 0, 1, 0, 0, 0, 0]),
+        np.array([0, 0, 0, 0, 4, 0, 0, 0, 9])
+    ])
+
     print(f"solve this here:\n{board}")
-    solution = solve_sudoku_bt(board)
-    if solution:
-        print("solution found")
-    else:
-        print("no solution found :(")
+    solve_sudoku_bt(board)
 
 
 def solve_sudoku_bt(board: np.array):
     if is_solution(board):
+        print(f"solution found:\n{board}")
         return True
     else:
         next_field, possible_values = get_next_field(board)
-        if len(possible_values) == 0:
-            return False
         for value in possible_values:
             board[next_field] = value
-            solve_sudoku_bt(board)
-            board[next_field] = 0
-        return False
+            rtn = solve_sudoku_bt(board)
+            if rtn:
+                return True
+            board[next_field] = 0  # unmake move
 
 
 def get_next_field(board: np.array):
-    # candidates = np.arange(0, 10)
-    # get field with the least constraint
-    current_min = 8 + 8 + 8
+    # get field that is most constrained
+    current_min = 9
     available_numbers_for_field = np.array
     field_index = None
 
@@ -77,52 +72,30 @@ def calculate_constraints_for_field(board: np.array, index):
     values = np.setdiff1d(values, board.copy().transpose()[index[1]])
 
     # check square
-    surrounding_fields = np.array([0, 0])
-
-    if index[0] > 0 and index[1] > 0:
-        surrounding_fields = np.append(
-            surrounding_fields, [
-                board[index[0] - 1][index[1] - 1],
-                board[index[0] - 1][index[1] + 0],
-                board[index[0] - 0][index[1] - 1]
-            ]
-        )
-
-    if index[0] > 0 and index[1] < 8:
-        surrounding_fields = np.append(
-            surrounding_fields, [
-                board[index[0] - 1][index[1] + 1]
-            ]
-        )
-
-    if index[1] < 8:
-        surrounding_fields = np.append(
-            surrounding_fields, [
-                board[index[0]][index[1] + 1]
-            ]
-        )
-
-    if index[0] < 8 and index[1] > 0:
-        surrounding_fields = np.append(
-            surrounding_fields, [
-                board[index[0] + 1][index[1] - 1],
-                board[index[0] + 1][index[1] + 0],
-            ]
-        )
-    if index[0] < 8 and index[1] < 8:
-        surrounding_fields = np.append(
-            surrounding_fields, [
-                board[index[0] + 1][index[1] + 1]
-            ]
-        )
+    surrounding_fields = get_surrounding_values(board, index)
 
     values = np.setdiff1d(values, surrounding_fields)
 
     return values
 
 
+def get_surrounding_values(board: np.array, index):
+    vertical = index[0] // 3
+    horizontal = index[1] // 3
+    return np.array([
+        board[3 * vertical + 0][3 * horizontal + 0],
+        board[3 * vertical + 1][3 * horizontal + 0],
+        board[3 * vertical + 2][3 * horizontal + 0],
+        board[3 * vertical + 0][3 * horizontal + 1],
+        board[3 * vertical + 1][3 * horizontal + 1],
+        board[3 * vertical + 2][3 * horizontal + 1],
+        board[3 * vertical + 0][3 * horizontal + 2],
+        board[3 * vertical + 1][3 * horizontal + 2],
+        board[3 * vertical + 2][3 * horizontal + 2],
+    ])
+
+
 def is_solution(board):
-    print(board)
     for index, value in np.ndenumerate(board):
         if value == 0:
             return False
